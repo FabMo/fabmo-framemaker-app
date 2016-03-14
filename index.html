@@ -22,30 +22,88 @@ border: 1px solid black;
 }
 
 input{
-position: absolute;
-width: 72px;
-height: 24px;
-z-index:1;
+	position: absolute;
+	width: 72px;
+	height: 24px;
+}
+input:hover{
+/*	font-weight: bold; */
 }
 
 #input_submit{
-right: 30px;
-bottom: 30px;
-width:100px;
-height:100px;
-
-
+	right: 30px;
+	bottom: 30px;
+	width:100px;
+	height:100px;
 }
+/*
+#inch{
+	position: absolute;
+	right: 5px;
+	bottom: 180px;
+}
+
+#mm{
+	position: absolute;
+	right: 5px;
+	bottom: 140px;
+}
+*/
+
+#input_depth{
+	position: absolute;
+	right: 30px;
+	bottom: 150px;
+	width: 92px;
+}
+depth{
+	position: absolute;
+	right: 58px;
+	bottom: 180px;
+	font-family: arial;
+	font-size: 16px;
+}
+
+
+#input_tool{
+	position: absolute;
+	right: 30px;
+	bottom: 200px;
+	width: 92px;
+}
+tool{
+	position: absolute;
+	right: 30px;
+	bottom: 230px;
+	font-family: arial;
+	font-size: 16px;
+}
+
+
 
 </style>
 
 </head>
 
-<body onload="reload();">
+<body onload="makeFrame();">
 
 <input id="input_width" type="number" value="50" autocomplete="off" step="0.1"/>
 <input id="input_height" type="number" value="50" autocomplete="off" step="0.1"/>
 <input id="input_radius" type="number" value="5" autocomplete="off" step="0.1"/>
+
+<!--
+<input id="inch" type="radio" name="unit" value="inch" autocomplete="off">
+<input id="mm" type="radio" name="unit" value="mm" autocomplete="off" checked>
+-->
+
+<tool>tool diameter:</tool>
+<input id="input_tool" type="number" value="1.5875" autocomplete="off" step="0.79375"/>
+
+
+<depth>cut depth:</depth>
+<input id="input_depth" type="number" value="1" autocomplete="off" step="0.1"/>
+
+
 <input id="input_submit" type="submit" value="SUBMIT&#x00A;JOB" onclick="make()"/>
 
 <canvas id="myCanvas"></canvas>
@@ -55,13 +113,14 @@ height:100px;
 
 var g = ""
 var tool_diameter
-var cutout = []
+var frame = []
 var verts = 100
 var xmin = -25
 var ymin = -25
 var xmax = 25
 var ymax = 25
 var radius = 5
+var tool = 1.5875
 
 var c
 var ctx
@@ -71,32 +130,27 @@ var input_width
 var input_height
 var input_radius
 
-function reload(){
-
-   cutout = []
-
-   makeFrame()
-
-}
 
 
 function makeFrame() {
 
+frame=[]
+
 for (i=0;i<=verts;i++) {
    if(i<=25){
-      cutout.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)});
+      frame.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)});
    }
    else if((i>25)&&(i<=50)){
-      cutout.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)});
+      frame.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)});
    }
    else if((i>50)&&(i<=75)){
-      cutout.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)});    
+      frame.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)});    
    }
    else if((i>75)&&(i<=100)){
-      cutout.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)});     
+      frame.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)});     
 
       if(i==100){
-      cutout.push(cutout[0])
+      frame.push(frame[0])
       }
       
    }
@@ -104,10 +158,9 @@ for (i=0;i<=verts;i++) {
    
 }
 
-//console.log(cutout)
-
+//console.log(frame)
+frame.reverse()
 draw()
-
 }
 
 
@@ -117,11 +170,8 @@ var input_width_style = document.getElementById("input_width").style;
 var input_height_style = document.getElementById("input_height").style;
 var input_radius_style = document.getElementById("input_radius").style;
 
-//console.log(input_height_style)
-
 c = document.getElementById("myCanvas");
 ctx = c.getContext("2d");
-ctx.fillStyle = "#FF0000";
 
 ctx.canvas.height = $(window).innerHeight()-30
 ctx.canvas.width = $(window).innerWidth()-30
@@ -139,9 +189,8 @@ input_width_style.top=(ctx.canvas.height/2+(ymax*sf)+24 + "px")
 input_height_style.left=((ctx.canvas.width/2)-(xmax*sf)-100 + "px")
 input_height_style.top=(ctx.canvas.height/2-12 + "px")
 
-input_radius_style.left=((ctx.canvas.width/2)+(xmax*sf)+30 + "px")
-input_radius_style.top=(ctx.canvas.height/2-(ymax*sf)+10 + "px")
-
+input_radius_style.left=((ctx.canvas.width/2)+(xmax*sf)+24 + "px")
+input_radius_style.top=(ctx.canvas.height/2-(ymax*sf) + "px")
 
 ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
 
@@ -167,47 +216,58 @@ ctx.stroke()
 
 ctx.beginPath()
 	ctx.lineWidth="1"
-	ctx.strokeStyle="purple"
-	ctx.lineTo((cutout[40].X*sf)+ctx.canvas.width/2,(cutout[40].Y*sf)+ctx.canvas.height/2)
-	ctx.lineTo((ctx.canvas.width/2)+(xmax*sf)+30,ctx.canvas.height/2-(ymax*sf)+18)
+	ctx.strokeStyle="#ff00ff"
+	ctx.lineTo(ctx.canvas.width/2+((xmax-radius)*sf),ctx.canvas.height/2+((ymin+radius)*sf))
+	ctx.lineTo((frame[63].X*sf)+ctx.canvas.width/2,(frame[63].Y*sf)+ctx.canvas.height/2)	
 ctx.stroke()
 
+ctx.beginPath()
+	ctx.lineWidth="1"
+	ctx.fillStyle = "yellow";
+	ctx.strokeStyle="black"
+	ctx.arc(ctx.canvas.width/2,ctx.canvas.height/2,3,0,(Math.PI*2))
+ctx.stroke();
+ctx.fill()
 
-
+ctx.beginPath()
+	ctx.fillStyle = "#ff00ff";
+	ctx.arc(ctx.canvas.width/2+((xmax-radius)*sf),ctx.canvas.height/2+((ymin+radius)*sf),2,0,(Math.PI*2))
+ctx.fill()
 
 ctx.beginPath()
 ctx.lineWidth="3"
 ctx.strokeStyle="blue"
 
-for(i=0;i<cutout.length;i++){
-	ctx.lineTo((cutout[i].X*sf)+ctx.canvas.width/2,(cutout[i].Y*sf)+ctx.canvas.height/2);
+for(i=0;i<frame.length;i++){
+	ctx.lineTo((frame[i].X*sf)+ctx.canvas.width/2,(frame[i].Y*sf)+ctx.canvas.height/2);
 }
 ctx.stroke()
 }
 
 $("#input_width").on("change", function(){
-	 xmax = (document.getElementById("input_width").value/2)
+	 xmax = parseFloat(document.getElementById("input_width").value/2)
 	 xmin = 0-xmax
-	 cutout=[]
+	 frame=[]
     setTimeout(makeFrame(), 100);
 })
 
-
-
 $("#input_height").on("change", function(){
-	 ymax = (document.getElementById("input_height").value/2)
+	 ymax = parseFloat(document.getElementById("input_height").value/2)
 	 ymin = 0-ymax
-	 cutout=[]
+	 frame=[]
     setTimeout(makeFrame(), 100);
 })
 
 $("#input_radius").on("change", function(){
 	 radius = parseFloat(document.getElementById("input_radius").value)
-	 cutout=[]
+	 frame=[]
     setTimeout(makeFrame(), 100);
 })
 
-
+$("#input_tool").on("change", function(){
+	 tool=parseFloat(document.getElementById("input_tool").value/2)
+    setTimeout(makeFrame(), 100);
+})
 
 
 $(window).resize(function(){
@@ -215,54 +275,34 @@ $(window).resize(function(){
 	draw()
 }); 
 
-
-
 function make(){
 
-cutout.reverse()
-
-/*
-var material = eval('({' + (document.getElementById("material").value) + '})');
-var pass = 1
-var pass_no = document.getElementById("thickness").value
-
-if(pass_no==0){
-   pass_no=1
-   var pass_depth = document.getElementById("thickness").value/pass_no
-}
-*/
 var material = {feed:500,plunge:200}
 var pass = 1
-var pass_no=1
-var pass_depth=1
+var pass_no = (Math.ceil(document.getElementById("input_depth").value/(document.getElementById("input_tool").value/2)))
+var pass_depth = (document.getElementById("input_depth").value/pass_no).toFixed(3)
 
-
-
-//part A
-//header
 g+="g21\n"
 g+="g0z3\n"
 g+="m4\n"
 g+="g4p2\n"
 
-   g+="g0x"+(cutout[0].X.toFixed(2))+"y"+ (cutout[0].Y).toFixed(2) + "\n"
+g+="g0x"+(frame[0].X.toFixed(3))+"y"+ (frame[0].Y).toFixed(3) + "\n"
 
 while(pass<=pass_no){
    
    g+="g1z-"+ (pass_depth*pass) + "f" + material.plunge + "\n"
-   for(i=1;i<cutout.length;i++){
-      g+="g1x"+(cutout[i].X).toFixed(2) +"y"+ (cutout[i].Y).toFixed(2) + "f" + material.feed +  "\n"
+   for(i=1;i<frame.length;i++){
+      g+="g1x"+(frame[i].X).toFixed(3) +"y"+ (frame[i].Y).toFixed(3) + "f" + material.feed +  "\n"
    }
    pass++
 }
-
-
 
 g+="g0z5\n"
 g+="m5\n"
 g+="m30\n"
 
-//console.log(g)
+console.log(g)
 
 fabmo.submitJob({
    file : g,
@@ -271,8 +311,9 @@ fabmo.submitJob({
    description : (xmax*2) + " x " + (ymax*2) + " x " + "mm" 
 });
 
+
 g=""
-cutout.reverse()
+
 
 }
 
