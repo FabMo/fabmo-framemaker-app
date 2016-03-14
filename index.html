@@ -15,10 +15,8 @@
 
 <style>
 
-#myCanvas{
-/*
-border: 1px solid black;
-*/
+body{
+	background:#eee;
 }
 
 input{
@@ -58,7 +56,7 @@ input:hover{
 }
 depth{
 	position: absolute;
-	right: 58px;
+	right: 60px;
 	bottom: 180px;
 	font-family: arial;
 	font-size: 16px;
@@ -73,8 +71,16 @@ depth{
 }
 tool{
 	position: absolute;
-	right: 30px;
+	right: 32px;
 	bottom: 230px;
+	font-family: arial;
+	font-size: 16px;
+}
+
+units{
+	position: absolute;
+	right: 60px;
+	bottom: 130px;
 	font-family: arial;
 	font-size: 16px;
 }
@@ -85,42 +91,43 @@ tool{
 
 </head>
 
-<body onload="makeFrame();">
-
-<input id="input_width" type="number" value="50" autocomplete="off" step="0.1"/>
-<input id="input_height" type="number" value="50" autocomplete="off" step="0.1"/>
-<input id="input_radius" type="number" value="5" autocomplete="off" step="0.1"/>
+<body onload="makeFrame(radius);">
 
 <!--
 <input id="inch" type="radio" name="unit" value="inch" autocomplete="off">
 <input id="mm" type="radio" name="unit" value="mm" autocomplete="off" checked>
 -->
 
+<units>units: mm</units>
+
 <tool>tool diameter:</tool>
-<input id="input_tool" type="number" value="1.5875" autocomplete="off" step="0.79375"/>
+<input id="input_tool" type="number" value="3.175" autocomplete="on" step="0.79375" min="0"/>
 
 
 <depth>cut depth:</depth>
-<input id="input_depth" type="number" value="1" autocomplete="off" step="0.1"/>
+<input id="input_depth" type="number" value="1" autocomplete="on" step="0.1" min="0"/>
 
 
 <input id="input_submit" type="submit" value="SUBMIT&#x00A;JOB" onclick="make()"/>
 
 <canvas id="myCanvas"></canvas>
    
+<input id="input_width" type="number" value="50" autocomplete="off" step="0.1" min="0.1"/>
+<input id="input_height" type="number" value="50" autocomplete="off" step="0.1" min="0.1"/>
+<input id="input_radius" type="number" value="5" autocomplete="off" step="0.1" min="0"/>   
 
 <script>
 
 var g = ""
-var tool_diameter
-var frame = []
+var frame1 = []
+var path1 = []
 var verts = 100
 var xmin = -25
 var ymin = -25
 var xmax = 25
 var ymax = 25
 var radius = 5
-var tool = 1.5875
+var tool = parseFloat(document.getElementById("input_tool").value/2)
 
 var c
 var ctx
@@ -130,36 +137,44 @@ var input_width
 var input_height
 var input_radius
 
+	 
 
+function makeFrame(radius) {
 
-function makeFrame() {
-
-frame=[]
+frame1=[]
+path1=[]
 
 for (i=0;i<=verts;i++) {
    if(i<=25){
-      frame.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)});
+      frame1.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)})
+      
+      path1.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*(radius+tool)),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*(radius+tool))})
    }
    else if((i>25)&&(i<=50)){
-      frame.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)});
+      frame1.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)})
+      
+      path1.push({X:((xmax-radius)+Math.sin((Math.PI*2)/verts*i)*(radius+tool)),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*(radius+tool))}) 
    }
    else if((i>50)&&(i<=75)){
-      frame.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)});    
+      frame1.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*radius)})
+      
+      path1.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*(radius+tool)),Y:((ymin+radius)+Math.cos((Math.PI*2)/verts*i)*(radius+tool))})     
    }
    else if((i>75)&&(i<=100)){
-      frame.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)});     
-
-      if(i==100){
-      frame.push(frame[0])
-      }
+      frame1.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*radius),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*radius)})
       
-   }
-   
-   
+      path1.push({X:((xmin+radius)+Math.sin((Math.PI*2)/verts*i)*(radius+tool)),Y:((ymax-radius)+Math.cos((Math.PI*2)/verts*i)*(radius+tool))})  
+           
+      if(i==100){
+      frame1.push(frame1[0])
+      path1.push(path1[0])
+      }      
+   }   
 }
 
-//console.log(frame)
-frame.reverse()
+
+//console.log(frame1)
+frame1.reverse()
 draw()
 }
 
@@ -216,9 +231,9 @@ ctx.stroke()
 
 ctx.beginPath()
 	ctx.lineWidth="1"
-	ctx.strokeStyle="#ff00ff"
+	ctx.strokeStyle="#555"
 	ctx.lineTo(ctx.canvas.width/2+((xmax-radius)*sf),ctx.canvas.height/2+((ymin+radius)*sf))
-	ctx.lineTo((frame[63].X*sf)+ctx.canvas.width/2,(frame[63].Y*sf)+ctx.canvas.height/2)	
+	ctx.lineTo((frame1[63].X*sf)+ctx.canvas.width/2,(frame1[63].Y*sf)+ctx.canvas.height/2)	
 ctx.stroke()
 
 ctx.beginPath()
@@ -230,43 +245,54 @@ ctx.stroke();
 ctx.fill()
 
 ctx.beginPath()
-	ctx.fillStyle = "#ff00ff";
+	ctx.fillStyle = "#555";
 	ctx.arc(ctx.canvas.width/2+((xmax-radius)*sf),ctx.canvas.height/2+((ymin+radius)*sf),2,0,(Math.PI*2))
 ctx.fill()
 
 ctx.beginPath()
-ctx.lineWidth="3"
-ctx.strokeStyle="blue"
-
-for(i=0;i<frame.length;i++){
-	ctx.lineTo((frame[i].X*sf)+ctx.canvas.width/2,(frame[i].Y*sf)+ctx.canvas.height/2);
-}
+ctx.setLineDash([5,5]);
+ctx.lineWidth="1"
+ctx.strokeStyle="#ff00ff"
+	for(i=0;i<path1.length;i++){
+		ctx.lineTo(((path1[i].X*sf)+ctx.canvas.width/2).toFixed(2),((path1[i].Y*sf)+ctx.canvas.height/2).toFixed(2))
+	}
 ctx.stroke()
+
+ctx.beginPath()
+ctx.setLineDash([0,0]);
+ctx.lineWidth="2"
+ctx.strokeStyle="blue"
+	for(i=0;i<frame1.length;i++){
+		ctx.lineTo((frame1[i].X*sf)+ctx.canvas.width/2,(frame1[i].Y*sf)+ctx.canvas.height/2)
+	}
+ctx.stroke()
+
+//
 }
 
 $("#input_width").on("change", function(){
 	 xmax = parseFloat(document.getElementById("input_width").value/2)
 	 xmin = 0-xmax
-	 frame=[]
-    setTimeout(makeFrame(), 100);
+	 frame1=[]
+    makeFrame(radius)
 })
 
 $("#input_height").on("change", function(){
 	 ymax = parseFloat(document.getElementById("input_height").value/2)
 	 ymin = 0-ymax
-	 frame=[]
-    setTimeout(makeFrame(), 100);
+	 frame1=[]
+    makeFrame(radius)
 })
 
 $("#input_radius").on("change", function(){
 	 radius = parseFloat(document.getElementById("input_radius").value)
-	 frame=[]
-    setTimeout(makeFrame(), 100);
+	 frame1=[]
+    makeFrame(radius)
 })
 
 $("#input_tool").on("change", function(){
 	 tool=parseFloat(document.getElementById("input_tool").value/2)
-    setTimeout(makeFrame(), 100);
+    makeFrame(radius)
 })
 
 
@@ -277,23 +303,34 @@ $(window).resize(function(){
 
 function make(){
 
+
 var material = {feed:500,plunge:200}
 var pass = 1
-var pass_no = (Math.ceil(document.getElementById("input_depth").value/(document.getElementById("input_tool").value/2)))
+if(document.getElementById("input_tool").value>0){
+	var pass_no = (Math.ceil(document.getElementById("input_depth").value/(document.getElementById("input_tool").value/2)))
+}
+else{
+	var pass_no = 1
+}
 var pass_depth = (document.getElementById("input_depth").value/pass_no).toFixed(3)
 
 g+="g21\n"
-g+="g0z3\n"
+g+="g0z5\n"
 g+="m4\n"
 g+="g4p2\n"
 
-g+="g0x"+(frame[0].X.toFixed(3))+"y"+ (frame[0].Y).toFixed(3) + "\n"
+path1.reverse()
+path1[0]={X:0,Y:ymax+tool}
+path1.push(path1[0])
+
+g+="g0x"+(path1[0].X.toFixed(3))+"y"+ (path1[0].Y).toFixed(3) + "\n"
 
 while(pass<=pass_no){
    
    g+="g1z-"+ (pass_depth*pass) + "f" + material.plunge + "\n"
-   for(i=1;i<frame.length;i++){
-      g+="g1x"+(frame[i].X).toFixed(3) +"y"+ (frame[i].Y).toFixed(3) + "f" + material.feed +  "\n"
+   g+="g1f" + material.feed + "\n"
+   for(i=1;i<path1.length;i++){
+      g+="g1x"+(path1[i].X).toFixed(3) +"y"+ (path1[i].Y).toFixed(3) + "\n"
    }
    pass++
 }
@@ -302,18 +339,20 @@ g+="g0z5\n"
 g+="m5\n"
 g+="m30\n"
 
-console.log(g)
+//console.log(g)
+
 
 fabmo.submitJob({
    file : g,
    filename : 'frame.g',
-   name : "frame",
+   name : "FRAME",
    description : (xmax*2) + " x " + (ymax*2) + " x " + "mm" 
 });
 
 
 g=""
 
+makeFrame(radius)
 
 }
 
