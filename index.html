@@ -24,9 +24,6 @@ input{
 	width: 72px;
 	height: 24px;
 }
-input:hover{
-/*	font-weight: bold; */
-}
 
 #input_submit{
 	right: 30px;
@@ -34,19 +31,8 @@ input:hover{
 	width:100px;
 	height:100px;
 }
-/*
-#inch{
-	position: absolute;
-	right: 5px;
-	bottom: 180px;
-}
 
-#mm{
-	position: absolute;
-	right: 5px;
-	bottom: 140px;
-}
-*/
+
 
 #input_depth{
 	position: absolute;
@@ -60,6 +46,7 @@ depth{
 	bottom: 180px;
 	font-family: arial;
 	font-size: 16px;
+	color: #333;
 }
 
 
@@ -75,6 +62,7 @@ tool{
 	bottom: 230px;
 	font-family: arial;
 	font-size: 16px;
+	color: #333;
 }
 
 units{
@@ -83,6 +71,7 @@ units{
 	bottom: 130px;
 	font-family: arial;
 	font-size: 16px;
+	color: #333;
 }
 
 
@@ -93,15 +82,10 @@ units{
 
 <body onload="makeFrame(radius);">
 
-<!--
-<input id="inch" type="radio" name="unit" value="inch" autocomplete="off">
-<input id="mm" type="radio" name="unit" value="mm" autocomplete="off" checked>
--->
-
 <units>units: mm</units>
 
 <tool>tool diameter:</tool>
-<input id="input_tool" type="number" value="3.175" autocomplete="on" step="0.79375" min="0"/>
+<input id="input_tool" type="number" value="3.175" autocomplete="on" step="0.79375"/>
 
 
 <depth>cut depth:</depth>
@@ -240,7 +224,7 @@ ctx.beginPath()
 	ctx.lineWidth="1"
 	ctx.fillStyle = "yellow";
 	ctx.strokeStyle="black"
-	ctx.arc(ctx.canvas.width/2,ctx.canvas.height/2,3,0,(Math.PI*2))
+	ctx.arc(ctx.canvas.width/2,ctx.canvas.height/2,2,0,(Math.PI*2))
 ctx.stroke();
 ctx.fill()
 
@@ -271,27 +255,76 @@ ctx.stroke()
 }
 
 $("#input_width").on("change", function(){
-	 xmax = parseFloat(document.getElementById("input_width").value/2)
-	 xmin = 0-xmax
-	 frame1=[]
+	 xmax = parseFloat(document.getElementById("input_width").value)
+	 if(isNaN(xmax)==true){
+    	xmax=radius*2
+    	document.getElementById('input_width').value=(xmax)
+    }
+    else if(xmax<radius*2){
+	 	xmax=radius*2
+	 	document.getElementById('input_width').value=(xmax).toFixed(1)
+	 }
+    else if(xmax<0.1){
+	 	xmax=Math.abs(xmax)
+	 	document.getElementById('input_width').value=(xmax).toFixed(1)
+	 }
+    xmax=(xmax/2).toFixed(3)	 
+	 xmin = -xmax
     makeFrame(radius)
 })
 
 $("#input_height").on("change", function(){
-	 ymax = parseFloat(document.getElementById("input_height").value/2)
-	 ymin = 0-ymax
-	 frame1=[]
+	 ymax = parseFloat(document.getElementById("input_height").value)
+	 if(isNaN(ymax)==true){
+    	ymax=radius*2
+    	document.getElementById('input_height').value=(ymax)
+    }
+    else if(ymax<radius*2){
+	 	ymax=radius*2
+	 	document.getElementById('input_height').value=(ymax).toFixed(1)
+	 }
+	 else if(ymax<0.1){
+	 	ymax=Math.abs(ymax)
+	 	document.getElementById('input_height').value=(ymax).toFixed(1)
+	 }
+    ymax=(ymax/2).toFixed(3) 
+	 ymin = -ymax
     makeFrame(radius)
 })
 
 $("#input_radius").on("change", function(){
 	 radius = parseFloat(document.getElementById("input_radius").value)
-	 frame1=[]
+    if(isNaN(radius)==true){
+    	radius=5
+    	document.getElementById('input_radius').value=radius
+    } 
+	 else if(radius<0){
+	 	radius=Math.abs(radius)
+	 	document.getElementById('input_radius').value=radius.toFixed(1)
+	 }
+	 else if(radius>xmax){
+	 	radius=xmax
+	   document.getElementById('input_radius').value=radius.toFixed(1)
+	 }
+	 else if(radius>ymax){
+	 	radius=ymax
+	   document.getElementById('input_radius').value=radius.toFixed(1)
+	 }
+
+
+
     makeFrame(radius)
 })
 
 $("#input_tool").on("change", function(){
-	 tool=parseFloat(document.getElementById("input_tool").value/2)
+	 tool=parseFloat(document.getElementById("input_tool").value)
+	 if(isNaN(tool)==true){
+    	tool=0
+    	document.getElementById('input_tool').value=0
+    }
+    else{
+    	tool=(tool/2)
+    }
     makeFrame(radius)
 })
 
