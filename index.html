@@ -386,7 +386,7 @@ g+="m4\n"
 g+="g4p2\n"
 
 path1.reverse()
-path1[0]={X:0,Y:ymax+tool}
+path1[0]={X:0,Y:parseFloat(ymax+tool)}
 path1.push(path1[0])
 
 g+="g0x"+(path1[0].X.toFixed(3))+"y"+ (path1[0].Y).toFixed(3) + "\n"
