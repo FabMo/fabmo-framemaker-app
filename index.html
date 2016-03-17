@@ -176,12 +176,10 @@ if(radius+tool<=0){
 	path1.push({X:-xmax-tool,Y:-ymax-tool})
 }
 
-
 //console.log(frame1)
 frame1.reverse()
 draw()
 }
-
 
 function draw(){
 
@@ -325,7 +323,8 @@ $("#input_radius").on("change", function(){
 	 	radius=Math.abs(radius)
 	 	document.getElementById('input_radius').value=radius.toFixed(1)
 	 }
-	 else if(radius>xmax){
+	 
+	 if(radius>xmax){
 	 	radius=xmax
 	   document.getElementById('input_radius').value=radius.toFixed(1)
 	 }
@@ -333,9 +332,7 @@ $("#input_radius").on("change", function(){
 	 	radius=ymax
 	   document.getElementById('input_radius').value=radius.toFixed(1)
 	 }
-
-
-
+	 
     makeFrame(radius)
 })
 
@@ -407,7 +404,6 @@ g+="m30\n"
 
 //console.log(g)
 
-
 fabmo.submitJob({
    file : g,
    filename : 'frame.g',
@@ -418,30 +414,7 @@ fabmo.submitJob({
 
 g=""
 
-makeFrame(radius)
 
-}
-
-// toggle full screen
-function toggleFullScreen() {
-  if (!document.fullscreenElement &&    // alternative standard method
-      !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen();
-    } else if (document.documentElement.mozRequestFullScreen) {
-      document.documentElement.mozRequestFullScreen();
-    } else if (document.documentElement.webkitRequestFullscreen) {
-      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-    }
-  } else {
-    if (document.cancelFullScreen) {
-      document.cancelFullScreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitCancelFullScreen) {
-      document.webkitCancelFullScreen();
-    }
-  }
 }
 
 </script>
