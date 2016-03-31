@@ -80,7 +80,7 @@ units{
 
 </head>
 
-<body onload="makeFrame(radius);">
+<body onload="loadConfig(); makeFrame(radius);">
 
 <units>units: mm</units>
 
@@ -122,12 +122,16 @@ var input_width
 var input_height
 var input_radius
 
+var myConfig = {}
+
 	 
 
 function makeFrame(radius) {
 
 frame1=[]
 path1=[]
+
+
 
 for (i=0;i<=verts;i++) {
    if(i<=25){
@@ -166,8 +170,7 @@ if(radius==0){
 	frame1.push({X:xmax,Y:ymax})
 }
 
-
-if(radius+tool<=0){
+else if(radius+tool<=0){
 	path1=[]
 	path1.push({X:-xmax-tool,Y:-ymax-tool})
 	path1.push({X:-xmax-tool,Y:-ymin+tool})
@@ -291,6 +294,11 @@ $("#input_width").on("change", function(){
 	 }
     xmax=(xmax/2).toFixed(3)	 
 	 xmin = -xmax
+	 //setAppConfig
+	 myConfig.xmin=xmin
+	 myConfig.xmax=xmax
+    fabmo.setAppConfig(myConfig)
+
     makeFrame(radius)
 })
 
@@ -310,6 +318,12 @@ $("#input_height").on("change", function(){
 	 }
     ymax=(ymax/2).toFixed(3) 
 	 ymin = -ymax
+	 myConfig.ymin=ymin
+	 myConfig.ymax=ymax
+    fabmo.setAppConfig(myConfig)
+
+	 //setAppConfig
+
     makeFrame(radius)
 })
 
@@ -332,7 +346,10 @@ $("#input_radius").on("change", function(){
 	 	radius=ymax
 	   document.getElementById('input_radius').value=radius.toFixed(1)
 	 }
-	 
+	 //setAppConfig
+	 myConfig.radius=radius
+    fabmo.setAppConfig(myConfig)
+
     makeFrame(radius)
 })
 
@@ -354,10 +371,67 @@ $("#input_tool").on("change", function(){
     	tool=ymin
     	document.getElementById('input_tool').value=tool*2  	   
     }
-   
+	 //setAppConfig
+	 myConfig.tool=tool
+    fabmo.setAppConfig(myConfig)
+
     makeFrame(radius)
 })
 
+
+$("#input_depth").on("change", function(){
+
+	 myConfig.depth=document.getElementById('input_depth').value
+    fabmo.setAppConfig(myConfig)
+
+})
+
+function loadConfig(){
+
+fabmo.getAppConfig(function(err, myConfig) {
+
+
+
+if(typeof myConfig.xmin != 'undefined'){
+	xmin = myConfig.xmin
+}
+
+if(typeof myConfig.xmax != 'undefined'){
+	xmax = myConfig.xmax
+}
+
+if(typeof myConfig.ymin != 'undefined'){
+	ymin = myConfig.ymin
+}
+
+if(typeof myConfig.ymax != 'undefined'){
+	ymax = myConfig.ymax
+}
+
+if(typeof myConfig.radius != 'undefined'){
+	radius = myConfig.radius
+}
+
+if(typeof myConfig.tool != 'undefined'){
+	tool = myConfig.tool
+}
+
+if(typeof myConfig.depth != 'undefined'){
+	document.getElementById('input_depth').value = myConfig.depth
+}
+
+document.getElementById('input_tool').value = tool*2
+document.getElementById('input_radius').value = radius
+document.getElementById('input_width').value = xmax*2
+document.getElementById('input_height').value = ymax*2
+
+
+makeFrame(radius)
+
+});
+
+
+}
 
 $(window).resize(function(){
 
